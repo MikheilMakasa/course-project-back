@@ -33,7 +33,7 @@ export const addPost = (req, res) => {
 
 export const deletePost = (req, res) => {
   const token = req.cookies.access_token;
-
+  console.log(token);
   if (!token) {
     return res.status(401).json('not authenticated!');
   }

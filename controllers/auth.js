@@ -61,13 +61,14 @@ export const login = (req, res) => {
 
     const { password, ...other } = data[0];
     console.log('before token');
-    res
-      .cookie('access_token', token, { httpOnly: true })
-      .status(200)
-      .json(other);
+    res.cookie('access_token', token, {
+      httpOnly: true,
+      sameSite: 'none',
+      secure: true,
+    });
+    console.log('after token');
+    return res.status(200).json(other);
   });
-
-  console.log('after token');
 };
 
 export const logout = (req, res) => {
