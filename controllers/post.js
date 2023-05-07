@@ -86,7 +86,6 @@ export const deletePost = (req, res) => {
     });
   });
 };
-
 export const updatePost = (req, res) => {
   const token = req.cookies.access_token;
   console.log(token);
@@ -102,15 +101,17 @@ export const updatePost = (req, res) => {
 
       const postId = req.params.id;
       const q =
-        'UPDATE posts SET `title`=?, `description`=?, `cat`=? WHERE `id`=? AND `uid`=?';
+        'UPDATE posts SET `title`=?, `description`=?, `img`=?, `cat`=?  WHERE `id`=? AND `uid`=?';
 
       const values = [
         req.body.title,
         req.body.description,
+        req.body.image,
         req.body.cat,
         postId,
         userInfo.id,
       ];
+
       db.query(q, values, (err, data) => {
         if (err) {
           return res.status(500).json(err);
