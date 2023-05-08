@@ -16,14 +16,49 @@ export const getPosts = (req, res) => {
 };
 
 export const getPost = (req, res) => {
-  const q =
-    'SELECT p.id, `username`, `title`, `description`, p.img, u.img AS userImg, `cat`, `date`, p.likes_count FROM users u JOIN posts p ON u.id=p.uid WHERE p.id= ?';
+  const postId = req.params.id;
 
-  db.query(q, [req.params.id], (err, data) => {
+  const postQuery = `
+    SELECT p.id, u.username, p.title, p.description, p.img, u.img AS userImg, p.cat, p.date, p.likes_count
+    FROM users u
+    JOIN posts p ON u.id = p.uid
+    WHERE p.id = ?
+  `;
+
+  const likesQuery = `
+    SELECT l.id AS likeId, l.user_id AS likeUserId, l.post_id AS likePostId
+    FROM likes l
+    WHERE l.post_id = ?
+  `;
+
+  db.query(postQuery, [postId], (err, postData) => {
     if (err) {
       return res.status(500).json(err);
     }
-    return res.status(200).json(data[0]);
+
+    db.query(likesQuery, [postId], (err, likesData) => {
+      if (err) {
+        return res.status(500).json(err);
+      }
+
+      const post = postData[0];
+      const likes = likesData;
+
+      const result = {
+        id: post.id,
+        username: post.username,
+        title: post.title,
+        description: post.description,
+        img: post.img,
+        userImg: post.userImg,
+        cat: post.cat,
+        date: post.date,
+        likes_count: post.likes_count,
+        likes: likes,
+      };
+
+      return res.status(200).json(result);
+    });
   });
 };
 
