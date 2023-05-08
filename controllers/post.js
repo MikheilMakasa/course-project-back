@@ -10,7 +10,7 @@ export const getPosts = (req, res) => {
     if (err) {
       return res.status(500).json(err);
     }
-    console.log(data);
+
     return res.status(200).json(data);
   });
 };
@@ -29,7 +29,7 @@ export const getPost = (req, res) => {
 
 export const addPost = async (req, res) => {
   const token = req.cookies.access_token;
-  console.log(token);
+
   if (!token) {
     return res.status(401).json('not authenticated!');
   }
@@ -65,7 +65,7 @@ export const addPost = async (req, res) => {
 
 export const deletePost = (req, res) => {
   const token = req.cookies.access_token;
-  console.log(token);
+
   if (!token) {
     return res.status(401).json('not authenticated!');
   }
@@ -88,7 +88,7 @@ export const deletePost = (req, res) => {
 };
 export const updatePost = (req, res) => {
   const token = req.cookies.access_token;
-  console.log(token);
+
   if (!token) {
     return res.status(401).json('not authenticated!');
   }
