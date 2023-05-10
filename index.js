@@ -9,12 +9,7 @@ import cookieParser from 'cookie-parser';
 
 dotenv.config();
 const app = express();
-app.use(
-  cors({
-    origin: 'https://ureview-makasa.netlify.app',
-    credentials: true,
-  })
-);
+app.use(cors({ credentials: true, origin: true }));
 
 // 'https://ureview-makasa.netlify.app'
 // 'http://localhost:3000'
