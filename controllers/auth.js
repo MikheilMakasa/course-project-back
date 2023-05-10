@@ -1,7 +1,6 @@
 import db from '../db.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { serialize } from 'cookie';
 
 export const register = (req, res) => {
   try {
@@ -37,6 +36,7 @@ export const register = (req, res) => {
 
 export const login = (req, res) => {
   // CHECK IF USER EXISTS
+
   const q = 'SELECT * FROM users WHERE username= ?';
 
   db.query(q, [req.body.username], (err, data) => {
@@ -61,38 +61,19 @@ export const login = (req, res) => {
 
     const { password, ...other } = data[0];
 
-    // Set cookie based on user agent
-    const userAgent = req.headers['user-agent'];
-    const isIphone = userAgent.includes('iPhone');
-
-    const cookieOptions = {
+    res.cookie('access_token', token, {
       httpOnly: true,
-      secure: !isIphone,
-      sameSite: isIphone ? 'Lax' : 'None',
-      maxAge: 30 * 24 * 60 * 60, // 30 days in seconds
-    };
-
-    res.setHeader(
-      'Set-Cookie',
-      serialize('access_token', token, cookieOptions)
-    );
+      sameSite: 'none',
+      secure: true,
+    });
 
     return res.status(200).json(other);
   });
 };
 
 export const logout = (req, res) => {
-  // Set cookie options based on user agent
-  const userAgent = req.headers['user-agent'];
-  const isIphone = userAgent.includes('iPhone');
-
-  const cookieOptions = {
-    sameSite: isIphone ? 'Lax' : 'None',
-    secure: !isIphone,
-    maxAge: 0,
-  };
-
-  res.setHeader('Set-Cookie', serialize('access_token', '', cookieOptions));
-
-  return res.status(200).json('User has been logged out');
+  res
+    .clearCookie('access_token', { sameSite: 'none', secure: true })
+    .status(200)
+    .json('User has been logged out');
 };
