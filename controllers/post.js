@@ -63,7 +63,7 @@ export const getPost = (req, res) => {
 };
 
 export const addPost = async (req, res) => {
-  const token = req.cookies.access_token;
+  const token = req.headers.authorization?.split(' ')[1];
 
   if (!token) {
     return res.status(401).json('not authenticated!');
@@ -100,7 +100,7 @@ export const addPost = async (req, res) => {
 };
 
 export const deletePost = (req, res) => {
-  const token = req.cookies.access_token;
+  const token = req.headers.authorization?.split(' ')[1];
 
   if (!token) {
     return res.status(401).json('not authenticated!');
@@ -123,7 +123,7 @@ export const deletePost = (req, res) => {
   });
 };
 export const updatePost = (req, res) => {
-  const token = req.cookies.access_token;
+  const token = req.headers.authorization?.split(' ')[1];
 
   if (!token) {
     return res.status(401).json('not authenticated!');
@@ -161,7 +161,7 @@ export const updatePost = (req, res) => {
 };
 
 export const likePost = (req, res) => {
-  const token = req.cookies.access_token;
+  const token = req.headers.authorization?.split(' ')[1];
 
   if (!token) {
     return res.status(401).json('not authenticated!');
