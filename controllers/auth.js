@@ -1,6 +1,7 @@
 import db from '../db.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { isMobile } from 'is-mobile';
 
 export const register = (req, res) => {
   try {
@@ -61,11 +62,13 @@ export const login = (req, res) => {
 
     const { password, ...other } = data[0];
 
-    res.cookie('access_token', token, {
+    const cookieOptions = {
       httpOnly: true,
-      sameSite: 'none',
-      secure: true,
-    });
+      sameSite: isMobile(req) ? 'lax' : 'none',
+      secure: isMobile(req) ? false : true,
+    };
+
+    res.cookie('access_token', token, cookieOptions);
 
     return res.status(200).json(other);
   });
@@ -73,7 +76,10 @@ export const login = (req, res) => {
 
 export const logout = (req, res) => {
   res
-    .clearCookie('access_token', { sameSite: 'none', secure: true })
+    .clearCookie('access_token', {
+      sameSite: isMobile(req) ? 'lax' : 'none',
+      secure: isMobile(req) ? false : true,
+    })
     .status(200)
     .json('User has been logged out');
 };
