@@ -63,7 +63,7 @@ export const login = (req, res) => {
 
     res.cookie('access_token', token, {
       httpOnly: true,
-      sameSite: 'none',
+      sameSite: 'lax',
       secure: true,
     });
 
@@ -73,7 +73,7 @@ export const login = (req, res) => {
 
 export const logout = (req, res) => {
   res
-    .clearCookie('access_token', { sameSite: 'none', secure: true })
+    .clearCookie('access_token', { sameSite: 'lax', secure: true })
     .status(200)
     .json('User has been logged out');
 };
