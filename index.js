@@ -9,10 +9,15 @@ import cookieParser from 'cookie-parser';
 
 dotenv.config();
 const app = express();
-app.use(cors({ credentials: true, origin: true }));
 
-// 'https://ureview-makasa.netlify.app'
-// 'http://localhost:3000'
+// Enable CORS
+app.use(
+  cors({
+    origin: ['https://ureview-makasa.netlify.app', 'http://localhost:3000'],
+    credentials: true,
+  })
+);
+
 app.use(cookieParser());
 app.use(express.json());
 
@@ -30,5 +35,5 @@ db.connect((err) => {
 
 const port = process.env.PORT || 8800;
 app.listen(port, () => {
-  console.log('connected to port ' + port);
+  console.log('Connected to port ' + port);
 });
