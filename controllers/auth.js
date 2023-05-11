@@ -1,7 +1,6 @@
 import db from '../db.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { isMobile } from 'is-mobile';
 
 export const register = (req, res) => {
   try {
@@ -20,8 +19,9 @@ export const register = (req, res) => {
       const salt = bcrypt.genSaltSync(10);
       const hash = bcrypt.hashSync(req.body.password, salt);
 
-      const q = 'INSERT INTO users(`username`,`email`,`password`) VALUES (?)';
-      const values = [req.body.username, req.body.email, hash];
+      const q =
+        'INSERT INTO users(`username`,`email`,`password`, `isAdmin`) VALUES (?)';
+      const values = [req.body.username, req.body.email, hash, 'false'];
 
       db.query(q, [values], (err, data) => {
         if (err) {
