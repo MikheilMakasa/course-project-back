@@ -43,15 +43,59 @@ export const getUsers = (req, res) => {
     return res.status(403).json('Token is not valid!');
   }
 };
+export const makeAdmin = async (req, res) => {
+  const { emailList } = req.body;
 
-export const blockUser = (req, res) => {
-  res.json('user from controller');
+  try {
+    await Promise.all(
+      emailList.map(async (email) => {
+        await db.query('UPDATE users SET isAdmin = ? WHERE email = ?', [
+          'true',
+          email,
+        ]);
+      })
+    );
+
+    return res.json({ status: 200, message: 'Users successfully made admin' });
+  } catch (error) {
+    return res.json({ status: 400, message: error });
+  }
 };
 
-export const unblockUser = (req, res) => {
-  res.json('user from controller');
+export const unmakeAdmin = async (req, res) => {
+  const { emailList } = req.body;
+
+  try {
+    await Promise.all(
+      emailList.map(async (email) => {
+        await db.query('UPDATE users SET isAdmin = ? WHERE email = ?', [
+          'false',
+          email,
+        ]);
+      })
+    );
+
+    return res.json({
+      status: 200,
+      message: 'Users successfully unmade from being admin',
+    });
+  } catch (error) {
+    return res.json({ status: 400, message: error });
+  }
 };
 
-export const deleteUser = (req, res) => {
-  res.json('user from controller');
+export const deleteUser = async (req, res) => {
+  const { emailList } = req.body;
+
+  try {
+    await Promise.all(
+      emailList.map(async (email) => {
+        await db.query('DELETE FROM users WHERE email = ?', [email]);
+      })
+    );
+
+    return res.json({ status: 200, message: 'Users successfully deleted' });
+  } catch (error) {
+    return res.json({ status: 400, message: error });
+  }
 };

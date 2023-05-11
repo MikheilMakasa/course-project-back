@@ -1,16 +1,16 @@
 import express from 'express';
 import {
   getUsers,
-  blockUser,
+  makeAdmin,
   deleteUser,
-  unblockUser,
+  unmakeAdmin,
 } from '../controllers/user.js';
 
 const router = express.Router();
 
 router.get('/', getUsers);
-router.get('/blockUser', blockUser);
-router.post('/unblockUser', unblockUser);
-router.delete('/deleteUser', deleteUser);
+router.post('/makeAdmin', makeAdmin);
+router.post('/unmakeAdmin', unmakeAdmin);
+router.post('/deleteUser', deleteUser);
 
 export default router;
