@@ -64,26 +64,6 @@ export const login = (req, res) => {
 
     const { password, ...other } = data[0];
 
-    // const cookieOptions = {
-    //   maxAge: 3600000,
-    //   // expires works the same as the maxAge
-    //   secure: true,
-    //   httpOnly: true,
-    //   sameSite: 'lax',
-    // };
-
-    res.cookie('access_token', token, { httpOnly: true });
-
-    return res.status(200).json(other);
+    return res.status(200).json({ token, user: other });
   });
-};
-
-export const logout = (req, res) => {
-  res
-    .clearCookie('access_token', {
-      sameSite: isMobile(req) ? 'lax' : 'none',
-      secure: isMobile(req) ? false : true,
-    })
-    .status(200)
-    .json('User has been logged out');
 };

@@ -63,176 +63,169 @@ export const getPost = (req, res) => {
 };
 
 export const addPost = async (req, res) => {
-  const token = req.cookies.access_token;
+  const token = req.headers.authorization?.split(' ')[1];
 
   if (!token) {
-    return res.status(401).json('not authenticated!');
+    return res.status(401).json('Not authenticated!');
   }
 
-  jwt.verify(token, process.env.SECRET_KEY, async (err, userInfo) => {
-    try {
+  try {
+    const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
+    const userId = decodedToken.id;
+
+    const q =
+      'INSERT INTO posts(`title`, `description`, `img`, `cat`, `date`, `uid`, `likes_count`) VALUES (?)';
+
+    const values = [
+      req.body.title,
+      req.body.description,
+      req.body.image,
+      req.body.cat,
+      req.body.date,
+      userId,
+      0, // Initialize likes_count to 0
+    ];
+    db.query(q, [values], (err, data) => {
       if (err) {
-        return res.status(403).json('Token is not valid!');
+        return res.status(500).json(err);
       }
-
-      const q =
-        'INSERT INTO posts(`title`, `description`, `img`, `cat`, `date`, `uid`, `likes_count`) VALUES (?)';
-
-      const values = [
-        req.body.title,
-        req.body.description,
-        req.body.image,
-        req.body.cat,
-        req.body.date,
-        userInfo.id,
-        0, // Initialize likes_count to 0
-      ];
-      db.query(q, [values], (err, data) => {
-        if (err) {
-          return res.status(500).json(err);
-        }
-        return res.status(200).json('Post has been created!');
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  });
+      return res.status(200).json('Post has been created!');
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(403).json('Token is not valid!');
+  }
 };
 
 export const deletePost = (req, res) => {
-  const token = req.cookies.access_token;
+  const token = req.headers.authorization?.split(' ')[1];
 
   if (!token) {
-    return res.status(401).json('not authenticated!');
+    return res.status(401).json('Not authenticated!');
   }
 
-  jwt.verify(token, process.env.SECRET_KEY, (err, userInfo) => {
-    if (err) {
-      return res.status(403).json('Token is not valid!');
-    }
+  try {
+    const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
+    const userId = decodedToken.id;
     const postId = req.params.id;
 
     const q = 'DELETE FROM posts WHERE `id` = ? AND `uid` = ?';
 
-    db.query(q, [postId, userInfo.id], (err, data) => {
+    db.query(q, [postId, userId], (err, data) => {
       if (err) {
         return res.status(403).json('You can delete only your posts');
       }
       return res.status(200).json('Post has been deleted!');
     });
-  });
+  } catch (error) {
+    console.log(error);
+    return res.status(403).json('Token is not valid!');
+  }
 };
+
 export const updatePost = (req, res) => {
-  const token = req.cookies.access_token;
+  const token = req.headers.authorization?.split(' ')[1];
 
   if (!token) {
-    return res.status(401).json('not authenticated!');
+    return res.status(401).json('Not authenticated!');
   }
 
-  jwt.verify(token, process.env.SECRET_KEY, async (err, userInfo) => {
-    try {
+  try {
+    const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
+    const userId = decodedToken.id;
+    const postId = req.params.id;
+    const q =
+      'UPDATE posts SET `title`=?, `description`=?, `img`=?, `cat`=?  WHERE `id`=? AND `uid`=?';
+
+    const values = [
+      req.body.title,
+      req.body.description,
+      req.body.image,
+      req.body.cat,
+      postId,
+      userId,
+    ];
+
+    db.query(q, values, (err, data) => {
       if (err) {
-        return res.status(403).json('Token is not valid!');
+        return res.status(500).json(err);
       }
-
-      const postId = req.params.id;
-      const q =
-        'UPDATE posts SET `title`=?, `description`=?, `img`=?, `cat`=?  WHERE `id`=? AND `uid`=?';
-
-      const values = [
-        req.body.title,
-        req.body.description,
-        req.body.image,
-        req.body.cat,
-        postId,
-        userInfo.id,
-      ];
-
-      db.query(q, values, (err, data) => {
-        if (err) {
-          return res.status(500).json(err);
-        }
-        return res.status(200).json('Post has been updated!');
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  });
+      return res.status(200).json('Post has been updated!');
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(403).json('Token is not valid!');
+  }
 };
 
 export const likePost = (req, res) => {
-  const token = req.cookies.access_token;
+  const token = req.headers.authorization?.split(' ')[1];
 
   if (!token) {
-    return res.status(401).json('not authenticated!');
+    return res.status(401).json('Not authenticated!');
   }
 
-  jwt.verify(token, process.env.SECRET_KEY, async (err, userInfo) => {
-    try {
+  try {
+    const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
+    const userId = decodedToken.id;
+    const postId = req.params.id;
+
+    // Check if the user has already liked the post
+    const selectQuery = 'SELECT * FROM likes WHERE post_id = ? AND user_id = ?';
+
+    db.query(selectQuery, [postId, userId], (err, data) => {
       if (err) {
-        return res.status(403).json('Token is not valid!');
+        return res.status(500).json(err);
       }
 
-      const postId = req.params.id;
-      const userId = userInfo.id;
+      if (data.length === 0) {
+        // User has not liked the post, add a new like
+        const insertQuery =
+          'INSERT INTO likes (post_id, user_id) VALUES (?, ?)';
 
-      // Check if the user has already liked the post
-      const selectQuery =
-        'SELECT * FROM likes WHERE post_id = ? AND user_id = ?';
+        db.query(insertQuery, [postId, userId], (err, data) => {
+          if (err) {
+            return res.status(500).json(err);
+          }
 
-      db.query(selectQuery, [postId, userId], (err, data) => {
-        if (err) {
-          return res.status(500).json(err);
-        }
+          // Increment the likes_count in the posts table
+          const updateQuery =
+            'UPDATE posts SET likes_count = likes_count + 1 WHERE id = ?';
 
-        if (data.length === 0) {
-          // User has not liked the post, add a new like
-          const insertQuery =
-            'INSERT INTO likes (post_id, user_id) VALUES (?, ?)';
-
-          db.query(insertQuery, [postId, userId], (err, data) => {
+          db.query(updateQuery, [postId], (err, data) => {
             if (err) {
               return res.status(500).json(err);
             }
 
-            // Increment the likes_count in the posts table
-            const updateQuery =
-              'UPDATE posts SET likes_count = likes_count + 1 WHERE id = ?';
-
-            db.query(updateQuery, [postId], (err, data) => {
-              if (err) {
-                return res.status(500).json(err);
-              }
-
-              return res.status(200).json('Post has been liked!');
-            });
+            return res.status(200).json('Post has been liked!');
           });
-        } else {
-          // User has already liked the post, remove the like
-          const deleteQuery =
-            'DELETE FROM likes WHERE post_id = ? AND user_id = ?';
+        });
+      } else {
+        // User has already liked the post, remove the like
+        const deleteQuery =
+          'DELETE FROM likes WHERE post_id = ? AND user_id = ?';
 
-          db.query(deleteQuery, [postId, userId], (err, data) => {
+        db.query(deleteQuery, [postId, userId], (err, data) => {
+          if (err) {
+            return res.status(500).json(err);
+          }
+
+          // Decrement the likes_count in the posts table
+          const updateQuery =
+            'UPDATE posts SET likes_count = likes_count - 1 WHERE id = ?';
+
+          db.query(updateQuery, [postId], (err, data) => {
             if (err) {
               return res.status(500).json(err);
             }
 
-            // Decrement the likes_count in the posts table
-            const updateQuery =
-              'UPDATE posts SET likes_count = likes_count - 1 WHERE id = ?';
-
-            db.query(updateQuery, [postId], (err, data) => {
-              if (err) {
-                return res.status(500).json(err);
-              }
-
-              return res.status(200).json('Post has been unliked!');
-            });
+            return res.status(200).json('Post has been unliked!');
           });
-        }
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  });
+        });
+      }
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(403).json('Token is not valid!');
+  }
 };
