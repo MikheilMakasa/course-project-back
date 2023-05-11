@@ -14,12 +14,11 @@ export const getPosts = (req, res) => {
     return res.status(200).json(data);
   });
 };
-
 export const getPost = (req, res) => {
   const postId = req.params.id;
 
   const postQuery = `
-    SELECT p.id, u.username, p.title, p.description, p.img, u.img AS userImg, p.cat, p.date, p.likes_count
+    SELECT p.id, u.username, p.title, p.description, p.img, p.cat, p.date, p.likes_count
     FROM users u
     JOIN posts p ON u.id = p.uid
     WHERE p.id = ?
@@ -50,7 +49,6 @@ export const getPost = (req, res) => {
         title: post.title,
         description: post.description,
         img: post.img,
-        userImg: post.userImg,
         cat: post.cat,
         date: post.date,
         likes_count: post.likes_count,
