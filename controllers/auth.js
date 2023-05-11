@@ -58,19 +58,21 @@ export const login = (req, res) => {
       return res.status(400).json({ error: 'Wrong username or password' });
     }
 
-    const token = jwt.sign({ id: data[0].id }, process.env.SECRET_KEY);
+    const token = jwt.sign({ id: data[0].id }, process.env.SECRET_KEY, {
+      expiresIn: '1h',
+    });
 
     const { password, ...other } = data[0];
 
-    const cookieOptions = {
-      maxAge: 3600000,
-      // expires works the same as the maxAge
-      secure: true,
-      httpOnly: true,
-      sameSite: 'lax',
-    };
+    // const cookieOptions = {
+    //   maxAge: 3600000,
+    //   // expires works the same as the maxAge
+    //   secure: true,
+    //   httpOnly: true,
+    //   sameSite: 'lax',
+    // };
 
-    res.cookie('access_token', token, cookieOptions);
+    res.cookie('access_token', token, { httpOnly: true });
 
     return res.status(200).json(other);
   });
