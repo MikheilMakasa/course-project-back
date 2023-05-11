@@ -63,9 +63,11 @@ export const login = (req, res) => {
     const { password, ...other } = data[0];
 
     const cookieOptions = {
+      maxAge: 3600000,
+      // expires works the same as the maxAge
+      secure: true,
       httpOnly: true,
-      sameSite: isMobile(req) ? 'lax' : 'none',
-      secure: isMobile(req) ? false : true,
+      sameSite: 'lax',
     };
 
     res.cookie('access_token', token, cookieOptions);
