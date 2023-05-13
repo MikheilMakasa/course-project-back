@@ -3,7 +3,7 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-const pool = mysql.createPool({
+const db = mysql.createPool({
   connectionLimit: 10, // Adjust the limit based on your needs
   host: process.env.DATABASE_HOST,
   user: process.env.DATABASE_USER,
@@ -12,7 +12,7 @@ const pool = mysql.createPool({
   port: process.env.DATABASE_PORT,
 });
 
-pool.getConnection((err, connection) => {
+db.getConnection((err, connection) => {
   if (err) {
     console.error('Error connecting to the database:', err);
     return;
@@ -25,7 +25,7 @@ pool.getConnection((err, connection) => {
     if (error.code === 'PROTOCOL_CONNECTION_LOST') {
       // Reconnect on lost connection
       connection.destroy();
-      pool.getConnection((err, newConnection) => {
+      db.getConnection((err, newConnection) => {
         if (err) {
           console.error('Error reconnecting to the database:', err);
           return;
@@ -39,4 +39,4 @@ pool.getConnection((err, connection) => {
   });
 });
 
-export default pool;
+export default db;
