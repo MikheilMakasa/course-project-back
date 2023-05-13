@@ -1,4 +1,4 @@
-import db from '../db.js';
+import pool from '../db.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
@@ -7,7 +7,7 @@ export const register = (req, res) => {
     // CHECK EXISTING USER
     const q = 'SELECT * FROM users WHERE email = ? OR username = ?';
 
-    db.query(q, [req.body.email, req.body.username], (err, data) => {
+    pool.query(q, [req.body.email, req.body.username], (err, data) => {
       if (err) {
         return res.json(err);
       }
@@ -23,7 +23,7 @@ export const register = (req, res) => {
         'INSERT INTO users(`username`,`email`,`password`, `isAdmin`) VALUES (?)';
       const values = [req.body.username, req.body.email, hash, 'false'];
 
-      db.query(q, [values], (err, data) => {
+      pool.query(q, [values], (err, data) => {
         if (err) {
           return res.json(err);
         }
@@ -40,7 +40,7 @@ export const login = (req, res) => {
 
   const q = 'SELECT * FROM users WHERE username= ?';
 
-  db.query(q, [req.body.username], (err, data) => {
+  pool.query(q, [req.body.username], (err, data) => {
     if (err) {
       return res.json(err);
     }

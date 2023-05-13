@@ -1,4 +1,4 @@
-import db from '../db.js';
+import pool from '../db.js';
 import jwt from 'jsonwebtoken';
 
 export const getPosts = (req, res) => {
@@ -6,7 +6,7 @@ export const getPosts = (req, res) => {
     ? 'SELECT * FROM posts WHERE cat=?'
     : 'SELECT * FROM posts';
 
-  db.query(q, [req.query.cat], (err, data) => {
+  pool.query(q, [req.query.cat], (err, data) => {
     if (err) {
       return res.status(500).json(err);
     }
@@ -30,12 +30,12 @@ export const getPost = (req, res) => {
     WHERE l.post_id = ?
   `;
 
-  db.query(postQuery, [postId], (err, postData) => {
+  pool.query(postQuery, [postId], (err, postData) => {
     if (err) {
       return res.status(500).json(err);
     }
 
-    db.query(likesQuery, [postId], (err, likesData) => {
+    pool.query(likesQuery, [postId], (err, likesData) => {
       if (err) {
         return res.status(500).json(err);
       }
@@ -83,7 +83,7 @@ export const addPost = async (req, res) => {
       userId,
       0, // Initialize likes_count to 0
     ];
-    db.query(q, [values], (err, data) => {
+    pool.query(q, [values], (err, data) => {
       if (err) {
         return res.status(500).json(err);
       }
@@ -109,7 +109,7 @@ export const deletePost = (req, res) => {
 
     const q = 'DELETE FROM posts WHERE `id` = ? AND `uid` = ?';
 
-    db.query(q, [postId, userId], (err, data) => {
+    pool.query(q, [postId, userId], (err, data) => {
       if (err) {
         return res.status(403).json('You can delete only your posts');
       }
@@ -144,7 +144,7 @@ export const updatePost = (req, res) => {
       userId,
     ];
 
-    db.query(q, values, (err, data) => {
+    pool.query(q, values, (err, data) => {
       if (err) {
         return res.status(500).json(err);
       }
@@ -171,7 +171,7 @@ export const likePost = (req, res) => {
     // Check if the user has already liked the post
     const selectQuery = 'SELECT * FROM likes WHERE post_id = ? AND user_id = ?';
 
-    db.query(selectQuery, [postId, userId], (err, data) => {
+    pool.query(selectQuery, [postId, userId], (err, data) => {
       if (err) {
         return res.status(500).json(err);
       }
@@ -181,7 +181,7 @@ export const likePost = (req, res) => {
         const insertQuery =
           'INSERT INTO likes (post_id, user_id) VALUES (?, ?)';
 
-        db.query(insertQuery, [postId, userId], (err, data) => {
+        pool.query(insertQuery, [postId, userId], (err, data) => {
           if (err) {
             return res.status(500).json(err);
           }
@@ -190,7 +190,7 @@ export const likePost = (req, res) => {
           const updateQuery =
             'UPDATE posts SET likes_count = likes_count + 1 WHERE id = ?';
 
-          db.query(updateQuery, [postId], (err, data) => {
+          pool.query(updateQuery, [postId], (err, data) => {
             if (err) {
               return res.status(500).json(err);
             }
@@ -203,7 +203,7 @@ export const likePost = (req, res) => {
         const deleteQuery =
           'DELETE FROM likes WHERE post_id = ? AND user_id = ?';
 
-        db.query(deleteQuery, [postId, userId], (err, data) => {
+        pool.query(deleteQuery, [postId, userId], (err, data) => {
           if (err) {
             return res.status(500).json(err);
           }
@@ -212,7 +212,7 @@ export const likePost = (req, res) => {
           const updateQuery =
             'UPDATE posts SET likes_count = likes_count - 1 WHERE id = ?';
 
-          db.query(updateQuery, [postId], (err, data) => {
+          pool.query(updateQuery, [postId], (err, data) => {
             if (err) {
               return res.status(500).json(err);
             }

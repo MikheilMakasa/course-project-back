@@ -1,4 +1,4 @@
-import db from '../db.js';
+import pool from '../db.js';
 import jwt from 'jsonwebtoken';
 
 export const getUsers = (req, res) => {
@@ -14,7 +14,7 @@ export const getUsers = (req, res) => {
 
     // Check if the user is an admin
     const isAdminQuery = 'SELECT isAdmin FROM users WHERE id = ?';
-    db.query(isAdminQuery, [userId], (err, userData) => {
+    pool.query(isAdminQuery, [userId], (err, userData) => {
       if (err) {
         return res.status(500).json(err);
       }
@@ -30,7 +30,7 @@ export const getUsers = (req, res) => {
 
       // Retrieve all users' information
       const getUsersQuery = 'SELECT id, username, email, isAdmin FROM users';
-      db.query(getUsersQuery, (err, usersData) => {
+      pool.query(getUsersQuery, (err, usersData) => {
         if (err) {
           return res.status(500).json(err);
         }
@@ -49,7 +49,7 @@ export const makeAdmin = async (req, res) => {
   try {
     await Promise.all(
       emailList.map(async (email) => {
-        await db.query('UPDATE users SET isAdmin = ? WHERE email = ?', [
+        await pool.query('UPDATE users SET isAdmin = ? WHERE email = ?', [
           'true',
           email,
         ]);
@@ -68,7 +68,7 @@ export const unmakeAdmin = async (req, res) => {
   try {
     await Promise.all(
       emailList.map(async (email) => {
-        await db.query('UPDATE users SET isAdmin = ? WHERE email = ?', [
+        await pool.query('UPDATE users SET isAdmin = ? WHERE email = ?', [
           'false',
           email,
         ]);
@@ -90,7 +90,7 @@ export const deleteUser = async (req, res) => {
   try {
     await Promise.all(
       emailList.map(async (email) => {
-        await db.query('DELETE FROM users WHERE email = ?', [email]);
+        await pool.query('DELETE FROM users WHERE email = ?', [email]);
       })
     );
 
