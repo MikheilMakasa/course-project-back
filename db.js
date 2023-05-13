@@ -13,29 +13,31 @@ const dbConfig = {
 
 const pool = mysql.createPool(dbConfig);
 
-function handleDisconnect() {
-  pool.getConnection((err, connection) => {
-    if (err) {
-      console.error('Error connecting to the database:', err);
-      // Retry connection after a delay
-      setTimeout(handleDisconnect, 2000);
-    } else {
-      console.log('Connected to the database');
-      // Release the connection back to the pool
-      connection.release();
-    }
-  });
+pool.getConnection((err, connection) => {
+  if (err) {
+    console.error('Error connecting to the database:', err);
+    return;
+  }
 
-  pool.on('error', (err) => {
+  connection.on('error', (err) => {
     console.error('Database connection error:', err);
     if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-      handleDisconnect();
+      // Re-establish the connection
+      pool.getConnection((err, connection) => {
+        if (err) {
+          console.error('Error reconnecting to the database:', err);
+        } else {
+          console.log('Reconnected to the database');
+          connection.release();
+        }
+      });
     } else {
       throw err;
     }
   });
-}
 
-handleDisconnect();
+  console.log('Connected to the database');
+  connection.release();
+});
 
 export default pool;
