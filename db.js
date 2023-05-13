@@ -3,37 +3,40 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-let db;
+const pool = mysql.createPool({
+  connectionLimit: 10, // Adjust the limit based on your needs
+  host: process.env.DATABASE_HOST,
+  user: process.env.DATABASE_USER,
+  password: process.env.DATABASE_PASSWORD,
+  database: process.env.DATABASE,
+  port: process.env.DATABASE_PORT,
+});
 
-function handleDisconnect() {
-  db = mysql.createConnection({
-    host: process.env.DATABASE_HOST,
-    user: process.env.DATABASE_USER,
-    password: process.env.DATABASE_PASSWORD,
-    database: process.env.DATABASE,
-    port: process.env.DATABASE_PORT,
-  });
+pool.getConnection((err, connection) => {
+  if (err) {
+    console.error('Error connecting to the database:', err);
+    return;
+  }
+  console.log('Connected to the database');
 
-  db.connect((err) => {
-    if (err) {
-      console.error('Error connecting to the database:', err);
-      // Retry connection after a delay
-      setTimeout(handleDisconnect, 2000);
+  // Handle disconnection
+  connection.on('error', (error) => {
+    console.error('Database connection error:', error);
+    if (error.code === 'PROTOCOL_CONNECTION_LOST') {
+      // Reconnect on lost connection
+      connection.destroy();
+      pool.getConnection((err, newConnection) => {
+        if (err) {
+          console.error('Error reconnecting to the database:', err);
+          return;
+        }
+        console.log('Reconnected to the database');
+        connection = newConnection;
+      });
     } else {
-      console.log('Connected to the database');
+      throw error;
     }
   });
+});
 
-  db.on('error', (err) => {
-    console.error('Database connection error:', err);
-    if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-      handleDisconnect();
-    } else {
-      throw err;
-    }
-  });
-}
-
-handleDisconnect();
-
-export default db;
+export default pool;
